@@ -1,0 +1,137 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* LuxSole Color Palette */
+    --luxsole-dark-green: #0F3F2B;
+    --luxsole-emerald: #1FA07A;
+    --luxsole-forest: #072A1E;
+    --luxsole-gold: #E1B75A;
+    --luxsole-neutral: #0A0D0B;
+    --luxsole-highlight: rgba(255, 255, 255, 0.03);
+    
+    /* Theme Variables - mapped to LuxSole palette */
+    --background: 0 0% 4%; /* #0A0D0B */
+    --foreground: 0 0% 98%;
+    --card: 155 60% 8%; /* Deep forest tint */
+    --card-foreground: 0 0% 98%;
+    --popover: 155 60% 8%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 155 60% 15%; /* Dark green */
+    --primary-foreground: 0 0% 98%;
+    --secondary: 164 68% 37%; /* Emerald */
+    --secondary-foreground: 0 0% 98%;
+    --muted: 155 40% 12%;
+    --muted-foreground: 0 0% 64%;
+    --accent: 42 64% 62%; /* Gold */
+    --accent-foreground: 155 60% 8%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 155 30% 18%;
+    --input: 155 30% 18%;
+    --ring: 164 68% 37%;
+    --radius: 0.5rem;
+    --chart-1: 164 68% 37%;
+    --chart-2: 42 64% 62%;
+    --chart-3: 155 60% 15%;
+    --chart-4: 155 40% 25%;
+    --chart-5: 155 30% 35%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-luxsole-neutral text-foreground;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    width: 100vw;
+    min-height: 100vh;
+  }
+  
+  /* Smooth scrolling */
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: var(--luxsole-forest);
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: var(--luxsole-emerald);
+    border-radius: 4px;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--luxsole-gold);
+  }
+}
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+  position: relative;
+}
+
+/* Canvas styling */
+canvas {
+  display: block;
+  touch-action: none;
+  outline: none;
+}
+
+/* Utility classes for LuxSole */
+@layer utilities {
+  .text-luxsole-gradient {
+    background: linear-gradient(135deg, var(--luxsole-emerald) 0%, var(--luxsole-gold) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .bg-luxsole-gradient {
+    background: linear-gradient(135deg, var(--luxsole-forest) 0%, var(--luxsole-dark-green) 100%);
+  }
+  
+  .surface-highlight {
+    background: var(--luxsole-highlight);
+  }
+  
+  .glass-effect {
+    background: rgba(15, 63, 43, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+}
+
+/* Loading animation */
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--luxsole-forest) 0%,
+    var(--luxsole-dark-green) 50%,
+    var(--luxsole-forest) 100%
+  );
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite;
+}
