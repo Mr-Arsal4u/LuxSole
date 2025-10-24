@@ -207,10 +207,12 @@ export default function HeroScene() {
         }
         
         // Check for specific WebGL features
-        const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
-        if (debugInfo) {
-          const renderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
-          console.log('WebGL Renderer:', renderer);
+        if (gl && 'getExtension' in gl) {
+          const debugInfo = (gl as any).getExtension('WEBGL_debug_renderer_info');
+          if (debugInfo) {
+            const renderer = (gl as any).getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+            console.log('WebGL Renderer:', renderer);
+          }
         }
         
       } catch (error) {
@@ -234,8 +236,21 @@ export default function HeroScene() {
       }
     };
     
-    window.addEventListener('error', handleError);
-    return () => window.removeEventListener('error', handleError);
+    // Only add event listener if window is available
+    if (typeof window !== 'undefined') {
+      try {
+        window.addEventListener('error', handleError);
+        return () => {
+          try {
+            window.removeEventListener('error', handleError);
+          } catch (error) {
+            console.warn('Error removing error event listener:', error);
+          }
+        };
+      } catch (error) {
+        console.warn('Error adding error event listener:', error);
+      }
+    }
   }, []);
   
   // Keyboard navigation support
@@ -253,7 +268,9 @@ export default function HeroScene() {
         window.addEventListener("keydown", handleKeyPress);
         return () => {
           try {
-            window.removeEventListener("keydown", handleKeyPress);
+            if (typeof window !== 'undefined') {
+              window.removeEventListener("keydown", handleKeyPress);
+            }
           } catch (error) {
             console.warn('Error removing event listener:', error);
           }
@@ -284,8 +301,12 @@ export default function HeroScene() {
     <div className="w-full h-full" role="img" aria-label="Interactive 3D shoe display">
       <Canvas
         ref={(canvas) => {
-          if (canvas) {
-            canvasRef.current = canvas;
+          try {
+            if (canvas && typeof canvas === 'object') {
+              (canvasRef as any).current = canvas;
+            }
+          } catch (error) {
+            console.warn('Error setting canvas ref:', error);
           }
         }}
         shadows
@@ -311,11 +332,7 @@ export default function HeroScene() {
         <SceneLighting />
         
         {/* HDR Environment */}
-        <Suspense fallback={
-          <div className="w-full h-full flex items-center justify-center">
-            <ImageShoe className="w-full h-full" />
-          </div>
-        }>
+        <Suspense fallback={null}>
           <Environment
             preset="studio"
             background={false}
@@ -324,11 +341,7 @@ export default function HeroScene() {
         </Suspense>
         
         {/* Main Shoe Model with LOD */}
-        <Suspense fallback={
-          <div className="w-full h-full flex items-center justify-center">
-            <ImageShoe className="w-full h-full" />
-          </div>
-        }>
+        <Suspense fallback={null}>
           <AnimatedShoe />
         </Suspense>
         
