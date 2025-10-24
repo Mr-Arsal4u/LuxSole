@@ -1,0 +1,8 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="512" height="512" fill="#0A0D0B"/>
+  <rect x="64" y="64" width="384" height="384" rx="32" fill="#0F3F2B"/>
+  <path d="M128 200C128 180 144 164 164 164H348C368 164 384 180 384 200V312C384 332 368 348 348 348H164C144 348 128 332 128 312V200Z" fill="#1FA07A"/>
+  <path d="M148 184C148 174 156 166 166 166H346C356 166 364 174 364 184V328C364 338 356 346 346 346H166C156 346 148 338 148 328V184Z" fill="#E1B75A"/>
+  <circle cx="256" cy="256" r="24" fill="#0F3F2B"/>
+  <text x="256" y="400" text-anchor="middle" fill="#1FA07A" font-family="Inter, sans-serif" font-size="32" font-weight="bold">LUXSOLE</text>
+</svg>
