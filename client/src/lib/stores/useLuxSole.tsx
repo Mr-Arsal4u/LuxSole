@@ -4,6 +4,7 @@ import { subscribeWithSelector } from "zustand/middleware";
 export type AppView = "hero" | "gallery" | "story" | "cart";
 export type Environment = "studio" | "runway" | "dusk";
 export type MaterialType = "leather" | "nubuck" | "glint" | "knit";
+export type ShoeType = "high-top" | "low-top" | "running";
 
 export interface ShoeConfig {
   id: string;
@@ -11,6 +12,7 @@ export interface ShoeConfig {
   baseColor: string;
   accentColor: string;
   material: MaterialType;
+  shoeType: ShoeType;
   price: number;
 }
 
@@ -72,6 +74,7 @@ export const DEFAULT_SHOES: ShoeConfig[] = [
     baseColor: "#1FA07A",
     accentColor: "#E1B75A",
     material: "leather",
+    shoeType: "running",
     price: 299,
   },
   {
@@ -80,6 +83,7 @@ export const DEFAULT_SHOES: ShoeConfig[] = [
     baseColor: "#0F3F2B",
     accentColor: "#1FA07A",
     material: "nubuck",
+    shoeType: "low-top",
     price: 349,
   },
   {
@@ -88,6 +92,7 @@ export const DEFAULT_SHOES: ShoeConfig[] = [
     baseColor: "#E1B75A",
     accentColor: "#072A1E",
     material: "glint",
+    shoeType: "high-top",
     price: 399,
   },
   {
@@ -96,7 +101,26 @@ export const DEFAULT_SHOES: ShoeConfig[] = [
     baseColor: "#072A1E",
     accentColor: "#E1B75A",
     material: "knit",
+    shoeType: "running",
     price: 279,
+  },
+  {
+    id: "luxsole-forest-hightop",
+    name: "Forest High-Top",
+    baseColor: "#072A1E",
+    accentColor: "#1FA07A",
+    material: "leather",
+    shoeType: "high-top",
+    price: 379,
+  },
+  {
+    id: "luxsole-gold-lowtop",
+    name: "Gold Classic",
+    baseColor: "#E1B75A",
+    accentColor: "#0F3F2B",
+    material: "nubuck",
+    shoeType: "low-top",
+    price: 329,
   },
 ];
 

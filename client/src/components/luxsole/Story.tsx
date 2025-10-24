@@ -64,6 +64,7 @@ function StoryScene({ scrollProgress }: StorySceneProps) {
         baseColor={DEFAULT_SHOES[0].baseColor}
         accentColor={DEFAULT_SHOES[0].accentColor}
         material={DEFAULT_SHOES[0].material}
+        shoeType={DEFAULT_SHOES[0].shoeType}
         scale={2.5}
       />
       

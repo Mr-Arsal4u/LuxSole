@@ -143,6 +143,7 @@ export default function Customizer() {
                 baseColor={customBaseColor}
                 accentColor={customAccentColor}
                 material={customMaterial}
+                shoeType={selectedShoe?.shoeType || "low-top"}
                 scale={2.5}
                 useAdvancedShaders={useAdvancedShaders}
               />

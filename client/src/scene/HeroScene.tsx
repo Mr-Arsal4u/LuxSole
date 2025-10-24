@@ -190,6 +190,7 @@ function AnimatedShoe() {
       baseColor={customBaseColor}
       accentColor={customAccentColor}
       material={customMaterial}
+      shoeType={selectedShoe.shoeType}
       scale={2.5}
       useAdvancedShaders={useAdvancedShaders}
     />

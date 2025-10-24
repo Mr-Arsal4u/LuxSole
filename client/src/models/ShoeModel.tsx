@@ -1,8 +1,13 @@
 /**
- * Procedurally Generated Shoe Model with LOD System
+ * Procedurally Generated Shoe Model with LOD System & Type Variations
  * 
- * This component generates a photorealistic placeholder shoe using
+ * This component generates photorealistic placeholder shoes using
  * procedural geometry and PBR materials with Level of Detail (LOD) support.
+ * 
+ * SHOE TYPES:
+ * - high-top: Tall ankle support, basketball/street style
+ * - low-top: Classic sneaker profile  
+ * - running: Streamlined athletic design
  * 
  * LOD LEVELS:
  * - LOD 0 (High): Full detail for close viewing (< 5 units)
@@ -18,88 +23,37 @@
  * return <primitive object={scene.clone()} />
  */
 
-import { useMemo, useRef, forwardRef, useEffect } from "react";
+import { useMemo, useRef, forwardRef, useState, useEffect } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
-import type { MaterialType } from "@/lib/stores/useLuxSole";
+import type { MaterialType, ShoeType } from "@/lib/stores/useLuxSole";
 import { createShoeMaterial } from "@/utils/three/materials";
 import { createAdvancedShoeMaterial } from "@/utils/three/advancedMaterials";
+import { createShoeGeometries } from "@/utils/three/shoeGeometries";
 
 interface ShoeModelProps {
   baseColor: string;
   accentColor: string;
   material: MaterialType;
+  shoeType?: ShoeType;
   envMap?: THREE.Texture | null;
   scale?: number;
   useAdvancedShaders?: boolean;
-}
-
-/**
- * Generate shoe geometry at different LOD levels
- */
-function createShoeGeometries(lodLevel: "high" | "medium" | "low") {
-  const detail = lodLevel === "high" ? 32 : lodLevel === "medium" ? 16 : 8;
-  
-  // Main body (upper part of shoe)
-  const bodyGeometry = new THREE.CapsuleGeometry(0.4, 1.2, detail / 2, detail);
-  bodyGeometry.rotateZ(Math.PI / 2);
-  bodyGeometry.translate(0, 0.3, 0);
-  
-  // Toe cap
-  const toeGeometry = new THREE.SphereGeometry(0.35, detail, detail / 2, 0, Math.PI);
-  toeGeometry.rotateY(Math.PI / 2);
-  toeGeometry.scale(1, 0.8, 1.2);
-  toeGeometry.translate(0.6, 0.2, 0);
-  
-  // Heel counter
-  const heelGeometry = new THREE.SphereGeometry(0.3, detail, detail / 2, Math.PI, Math.PI);
-  heelGeometry.rotateY(-Math.PI / 2);
-  heelGeometry.scale(0.8, 1, 1);
-  heelGeometry.translate(-0.6, 0.25, 0);
-  
-  // Sole (bottom)
-  const soleGeometry = new THREE.BoxGeometry(1.4, 0.15, 0.6, lodLevel === "high" ? 4 : 2, 1, lodLevel === "high" ? 2 : 1);
-  soleGeometry.translate(0, 0.075, 0);
-  
-  // Midsole accent
-  const midsoleGeometry = new THREE.BoxGeometry(1.3, 0.1, 0.55, lodLevel === "high" ? 4 : 2, 1, lodLevel === "high" ? 2 : 1);
-  midsoleGeometry.translate(0, 0.2, 0);
-  
-  // Lace area
-  const laceAreaGeometry = new THREE.BoxGeometry(0.8, 0.2, 0.3, lodLevel === "high" ? 3 : 1, 1, 1);
-  laceAreaGeometry.translate(0.1, 0.5, 0);
-  
-  // Tongue
-  const tongueGeometry = new THREE.BoxGeometry(0.4, 0.3, 0.1, lodLevel === "high" ? 2 : 1, lodLevel === "high" ? 2 : 1, 1);
-  tongueGeometry.rotateX(Math.PI / 12);
-  tongueGeometry.translate(0.1, 0.6, 0);
-  
-  // Heel tab
-  const heelTabGeometry = new THREE.BoxGeometry(0.15, 0.4, 0.3, 1, lodLevel === "high" ? 2 : 1, 1);
-  heelTabGeometry.translate(-0.7, 0.5, 0);
-  
-  return {
-    body: bodyGeometry,
-    toe: toeGeometry,
-    heel: heelGeometry,
-    sole: soleGeometry,
-    midsole: midsoleGeometry,
-    laceArea: laceAreaGeometry,
-    tongue: tongueGeometry,
-    heelTab: heelTabGeometry,
-  };
 }
 
 const ShoeModel = forwardRef<THREE.Group, ShoeModelProps>(({
   baseColor,
   accentColor,
   material,
+  shoeType = "low-top",
   envMap = null,
   scale = 1,
   useAdvancedShaders = true,
 }, ref) => {
   const groupRef = useRef<THREE.Group>(null!);
   const lodRef = useRef<THREE.LOD>(null);
+  const [currentShoeType, setCurrentShoeType] = useState(shoeType);
+  const transitionRef = useRef({ progress: 1, from: shoeType, to: shoeType });
   
   // Create materials with optional advanced shaders
   const baseMaterial = useMemo(
@@ -154,108 +108,122 @@ const ShoeModel = forwardRef<THREE.Group, ShoeModelProps>(({
     []
   );
   
-  // Create LOD levels once
+  // Handle shoe type transitions with smooth animation
+  useEffect(() => {
+    if (shoeType !== currentShoeType) {
+      transitionRef.current = {
+        progress: 0,
+        from: currentShoeType,
+        to: shoeType,
+      };
+    }
+  }, [shoeType, currentShoeType]);
+  
+  // Create LOD levels based on current shoe type
   const lodGroup = useMemo(() => {
     const lod = new THREE.LOD();
     
-    // High detail level (0-5 units)
-    const highDetail = new THREE.Group();
-    const highGeoms = createShoeGeometries("high");
-    
-    highDetail.add(new THREE.Mesh(highGeoms.body, baseMaterial));
-    highDetail.add(new THREE.Mesh(highGeoms.toe, baseMaterial));
-    highDetail.add(new THREE.Mesh(highGeoms.heel, baseMaterial));
-    highDetail.add(new THREE.Mesh(highGeoms.sole, soleMaterial));
-    highDetail.add(new THREE.Mesh(highGeoms.midsole, accentMaterial));
-    highDetail.add(new THREE.Mesh(highGeoms.laceArea, accentMaterial));
-    highDetail.add(new THREE.Mesh(highGeoms.tongue, baseMaterial));
-    highDetail.add(new THREE.Mesh(highGeoms.heelTab, accentMaterial));
-    
-    // Add lace details for high LOD
-    for (let i = 0; i < 5; i++) {
-      const laceGeom = new THREE.CylinderGeometry(0.015, 0.015, 0.25, 8);
-      laceGeom.rotateZ(Math.PI / 2);
-      laceGeom.translate(i * 0.15 - 0.2, 0.45 + i * 0.05, 0);
-      const laceMesh = new THREE.Mesh(laceGeom, laceMaterial);
-      laceMesh.castShadow = true;
-      highDetail.add(laceMesh);
-    }
-    
-    // Add logo
-    const logoMesh1 = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.08, 0.01), logoMaterial);
-    logoMesh1.position.set(0.5, 0.35, 0.31);
-    logoMesh1.castShadow = true;
-    highDetail.add(logoMesh1);
-    
-    // Enable shadows for all meshes
-    highDetail.traverse((child) => {
-      if (child instanceof THREE.Mesh) {
-        child.castShadow = true;
-        child.receiveShadow = true;
+    // Helper to build a LOD level
+    const buildLODLevel = (lodLevel: "high" | "medium" | "low", addDetails: boolean) => {
+      const group = new THREE.Group();
+      const geoms = createShoeGeometries(currentShoeType, lodLevel);
+      
+      // Main shoe parts
+      group.add(new THREE.Mesh(geoms.body, baseMaterial));
+      group.add(new THREE.Mesh(geoms.toe, baseMaterial));
+      group.add(new THREE.Mesh(geoms.heel, baseMaterial));
+      group.add(new THREE.Mesh(geoms.sole, soleMaterial));
+      group.add(new THREE.Mesh(geoms.midsole, accentMaterial));
+      group.add(new THREE.Mesh(geoms.laceArea, accentMaterial));
+      group.add(new THREE.Mesh(geoms.tongue, baseMaterial));
+      group.add(new THREE.Mesh(geoms.heelTab, accentMaterial));
+      
+      // Optional parts (high-top collar, side panels)
+      if (geoms.collar) {
+        group.add(new THREE.Mesh(geoms.collar, accentMaterial));
       }
-    });
-    
-    lod.addLevel(highDetail, 0);
-    
-    // Medium detail level (5-10 units)
-    const mediumDetail = new THREE.Group();
-    const medGeoms = createShoeGeometries("medium");
-    
-    mediumDetail.add(new THREE.Mesh(medGeoms.body, baseMaterial));
-    mediumDetail.add(new THREE.Mesh(medGeoms.toe, baseMaterial));
-    mediumDetail.add(new THREE.Mesh(medGeoms.heel, baseMaterial));
-    mediumDetail.add(new THREE.Mesh(medGeoms.sole, soleMaterial));
-    mediumDetail.add(new THREE.Mesh(medGeoms.midsole, accentMaterial));
-    mediumDetail.add(new THREE.Mesh(medGeoms.laceArea, accentMaterial));
-    mediumDetail.add(new THREE.Mesh(medGeoms.tongue, baseMaterial));
-    mediumDetail.add(new THREE.Mesh(medGeoms.heelTab, accentMaterial));
-    
-    const logoMesh2 = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.08, 0.01), logoMaterial);
-    logoMesh2.position.set(0.5, 0.35, 0.31);
-    logoMesh2.castShadow = true;
-    mediumDetail.add(logoMesh2);
-    
-    mediumDetail.traverse((child) => {
-      if (child instanceof THREE.Mesh) {
-        child.castShadow = true;
-        child.receiveShadow = true;
+      if (geoms.sidePanel) {
+        const sidePanelL = new THREE.Mesh(geoms.sidePanel, baseMaterial);
+        group.add(sidePanelL);
+        
+        // Mirror for right side
+        const sidePanelR = sidePanelL.clone();
+        sidePanelR.position.z = -sidePanelL.position.z;
+        sidePanelR.scale.z = -1;
+        group.add(sidePanelR);
       }
-    });
-    
-    lod.addLevel(mediumDetail, 5);
-    
-    // Low detail level (>10 units)
-    const lowDetail = new THREE.Group();
-    const lowGeoms = createShoeGeometries("low");
-    
-    lowDetail.add(new THREE.Mesh(lowGeoms.body, baseMaterial));
-    lowDetail.add(new THREE.Mesh(lowGeoms.toe, baseMaterial));
-    lowDetail.add(new THREE.Mesh(lowGeoms.heel, baseMaterial));
-    lowDetail.add(new THREE.Mesh(lowGeoms.sole, soleMaterial));
-    lowDetail.add(new THREE.Mesh(lowGeoms.midsole, accentMaterial));
-    lowDetail.add(new THREE.Mesh(lowGeoms.laceArea, accentMaterial));
-    lowDetail.add(new THREE.Mesh(lowGeoms.tongue, baseMaterial));
-    lowDetail.add(new THREE.Mesh(lowGeoms.heelTab, accentMaterial));
-    
-    lowDetail.traverse((child) => {
-      if (child instanceof THREE.Mesh) {
-        child.castShadow = true;
-        child.receiveShadow = true;
+      
+      // Add lace details for high LOD
+      if (addDetails) {
+        const laceCount = currentShoeType === "high-top" ? 7 : currentShoeType === "running" ? 4 : 5;
+        const laceYStart = currentShoeType === "high-top" ? 0.55 : currentShoeType === "running" ? 0.42 : 0.45;
+        
+        for (let i = 0; i < laceCount; i++) {
+          const laceGeom = new THREE.CylinderGeometry(0.015, 0.015, 0.25, 8);
+          laceGeom.rotateZ(Math.PI / 2);
+          laceGeom.translate(i * 0.15 - 0.2, laceYStart + i * 0.05, 0);
+          const laceMesh = new THREE.Mesh(laceGeom, laceMaterial);
+          laceMesh.castShadow = true;
+          group.add(laceMesh);
+        }
       }
-    });
+      
+      // Add logo
+      if (addDetails || lodLevel === "medium") {
+        const logoMesh = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.08, 0.01), logoMaterial);
+        const logoY = currentShoeType === "high-top" ? 0.5 : 0.35;
+        logoMesh.position.set(0.5, logoY, 0.31);
+        logoMesh.castShadow = true;
+        group.add(logoMesh);
+      }
+      
+      // Enable shadows for all meshes
+      group.traverse((child) => {
+        if (child instanceof THREE.Mesh) {
+          child.castShadow = true;
+          child.receiveShadow = true;
+        }
+      });
+      
+      return group;
+    };
     
-    lod.addLevel(lowDetail, 10);
+    // Build LOD levels
+    lod.addLevel(buildLODLevel("high", true), 0);
+    lod.addLevel(buildLODLevel("medium", false), 5);
+    lod.addLevel(buildLODLevel("low", false), 10);
     
     return lod;
-  }, [baseMaterial, accentMaterial, soleMaterial, laceMaterial, logoMaterial]);
+  }, [currentShoeType, baseMaterial, accentMaterial, soleMaterial, laceMaterial, logoMaterial]);
   
-  // Update LOD based on camera distance and dynamic lighting
+  // Update LOD, handle transitions, and update dynamic lighting
   const lightPosRef = useRef(new THREE.Vector3(5, 8, 5));
   const cameraPosRef = useRef(new THREE.Vector3(0, 0, 5));
   
-  useFrame(({ camera, scene }) => {
+  useFrame(({ camera, scene }, delta) => {
     if (lodRef.current) {
       lodRef.current.update(camera);
+    }
+    
+    // Handle shoe type transition animation
+    if (transitionRef.current.progress < 1) {
+      transitionRef.current.progress = Math.min(1, transitionRef.current.progress + delta * 2);
+      
+      // Smooth crossfade using opacity
+      if (groupRef.current) {
+        const opacity = 1 - Math.abs(transitionRef.current.progress - 0.5) * 2;
+        groupRef.current.traverse((child) => {
+          if (child instanceof THREE.Mesh && child.material instanceof THREE.Material) {
+            child.material.opacity = opacity;
+            child.material.transparent = opacity < 1;
+          }
+        });
+        
+        // Switch shoe type at midpoint
+        if (transitionRef.current.progress >= 0.5 && currentShoeType !== transitionRef.current.to) {
+          setCurrentShoeType(transitionRef.current.to);
+        }
+      }
     }
     
     // Update lighting and camera for advanced shaders

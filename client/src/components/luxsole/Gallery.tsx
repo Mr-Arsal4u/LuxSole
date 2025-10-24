@@ -117,6 +117,7 @@ function GalleryItem({ shoe, index }: GalleryItemProps) {
             baseColor={shoe.baseColor}
             accentColor={shoe.accentColor}
             material={shoe.material}
+            shoeType={shoe.shoeType}
             scale={2}
             useAdvancedShaders={useAdvancedShaders}
           />
