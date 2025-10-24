@@ -40,6 +40,7 @@ export default function Customizer() {
     setCustomAccentColor,
     selectedShoe,
     addToCart,
+    useAdvancedShaders,
   } = useLuxSole();
   
   const modalRef = useRef<HTMLDivElement>(null);
@@ -143,6 +144,7 @@ export default function Customizer() {
                 accentColor={customAccentColor}
                 material={customMaterial}
                 scale={2.5}
+                useAdvancedShaders={useAdvancedShaders}
               />
               
               <OrbitControls autoRotate autoRotateSpeed={1} enableZoom={false} />

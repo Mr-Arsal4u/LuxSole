@@ -161,7 +161,7 @@ function KeyboardCamera() {
  * Handles shoe rotation and material transitions
  */
 function AnimatedShoe() {
-  const { selectedShoe, customMaterial, customBaseColor, customAccentColor, isDemoMode } =
+  const { selectedShoe, customMaterial, customBaseColor, customAccentColor, isDemoMode, useAdvancedShaders } =
     useLuxSole();
   const shoeRef = useRef<THREE.Group>(null);
   const rotationSpeed = useRef(0);
@@ -191,6 +191,7 @@ function AnimatedShoe() {
       accentColor={customAccentColor}
       material={customMaterial}
       scale={2.5}
+      useAdvancedShaders={useAdvancedShaders}
     />
   );
 }

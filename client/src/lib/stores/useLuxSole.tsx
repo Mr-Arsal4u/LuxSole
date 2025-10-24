@@ -40,6 +40,10 @@ interface LuxSoleState {
   // Camera state
   isCameraAnimating: boolean;
   
+  // Advanced rendering settings
+  useAdvancedShaders: boolean;
+  soundEnabled: boolean;
+  
   // Actions
   setCurrentView: (view: AppView) => void;
   setLoading: (loading: boolean) => void;
@@ -56,6 +60,8 @@ interface LuxSoleState {
   updateQuantity: (id: string, quantity: number) => void;
   setCartOpen: (open: boolean) => void;
   setCameraAnimating: (animating: boolean) => void;
+  setUseAdvancedShaders: (enabled: boolean) => void;
+  setSoundEnabled: (enabled: boolean) => void;
 }
 
 // Default shoe configurations
@@ -110,6 +116,8 @@ export const useLuxSole = create<LuxSoleState>()(
     cart: [],
     isCartOpen: false,
     isCameraAnimating: false,
+    useAdvancedShaders: true,
+    soundEnabled: false, // Muted by default
     
     // Actions
     setCurrentView: (view) => set({ currentView: view }),
@@ -185,5 +193,9 @@ export const useLuxSole = create<LuxSoleState>()(
     setCartOpen: (open) => set({ isCartOpen: open }),
     
     setCameraAnimating: (animating) => set({ isCameraAnimating: animating }),
+    
+    setUseAdvancedShaders: (enabled) => set({ useAdvancedShaders: enabled }),
+    
+    setSoundEnabled: (enabled) => set({ soundEnabled: enabled }),
   }))
 );

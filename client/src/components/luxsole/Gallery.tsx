@@ -22,7 +22,7 @@ interface GalleryItemProps {
 }
 
 function GalleryItem({ shoe, index }: GalleryItemProps) {
-  const { setSelectedShoe, setCustomizerOpen } = useLuxSole();
+  const { setSelectedShoe, setCustomizerOpen, useAdvancedShaders } = useLuxSole();
   const cardRef = useRef<HTMLDivElement>(null);
   const canvasContainerRef = useRef<HTMLDivElement>(null);
   
@@ -118,6 +118,7 @@ function GalleryItem({ shoe, index }: GalleryItemProps) {
             accentColor={shoe.accentColor}
             material={shoe.material}
             scale={2}
+            useAdvancedShaders={useAdvancedShaders}
           />
           
           <OrbitControls

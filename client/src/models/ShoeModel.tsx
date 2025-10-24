@@ -18,11 +18,12 @@
  * return <primitive object={scene.clone()} />
  */
 
-import { useMemo, useRef, forwardRef } from "react";
-import { useFrame } from "@react-three/fiber";
+import { useMemo, useRef, forwardRef, useEffect } from "react";
+import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import type { MaterialType } from "@/lib/stores/useLuxSole";
 import { createShoeMaterial } from "@/utils/three/materials";
+import { createAdvancedShoeMaterial } from "@/utils/three/advancedMaterials";
 
 interface ShoeModelProps {
   baseColor: string;
@@ -30,6 +31,7 @@ interface ShoeModelProps {
   material: MaterialType;
   envMap?: THREE.Texture | null;
   scale?: number;
+  useAdvancedShaders?: boolean;
 }
 
 /**
@@ -94,19 +96,30 @@ const ShoeModel = forwardRef<THREE.Group, ShoeModelProps>(({
   material,
   envMap = null,
   scale = 1,
+  useAdvancedShaders = true,
 }, ref) => {
   const groupRef = useRef<THREE.Group>(null!);
   const lodRef = useRef<THREE.LOD>(null);
   
-  // Create materials
+  // Create materials with optional advanced shaders
   const baseMaterial = useMemo(
-    () => createShoeMaterial(material, baseColor, envMap),
-    [material, baseColor, envMap]
+    () => {
+      if (useAdvancedShaders) {
+        return createAdvancedShoeMaterial(material, baseColor, envMap, true);
+      }
+      return createShoeMaterial(material, baseColor, envMap);
+    },
+    [material, baseColor, envMap, useAdvancedShaders]
   );
   
   const accentMaterial = useMemo(
-    () => createShoeMaterial(material, accentColor, envMap),
-    [material, accentColor, envMap]
+    () => {
+      if (useAdvancedShaders) {
+        return createAdvancedShoeMaterial(material, accentColor, envMap, true);
+      }
+      return createShoeMaterial(material, accentColor, envMap);
+    },
+    [material, accentColor, envMap, useAdvancedShaders]
   );
   
   // Sole material (always rubber-like)
@@ -236,10 +249,48 @@ const ShoeModel = forwardRef<THREE.Group, ShoeModelProps>(({
     return lod;
   }, [baseMaterial, accentMaterial, soleMaterial, laceMaterial, logoMaterial]);
   
-  // Update LOD based on camera distance
-  useFrame(({ camera }) => {
+  // Update LOD based on camera distance and dynamic lighting
+  const lightPosRef = useRef(new THREE.Vector3(5, 8, 5));
+  const cameraPosRef = useRef(new THREE.Vector3(0, 0, 5));
+  
+  useFrame(({ camera, scene }) => {
     if (lodRef.current) {
       lodRef.current.update(camera);
+    }
+    
+    // Update lighting and camera for advanced shaders
+    if (useAdvancedShaders) {
+      // Get camera world position
+      camera.getWorldPosition(cameraPosRef.current);
+      
+      // Find the brightest spot light
+      let brightestLight: (THREE.SpotLight | THREE.DirectionalLight) | null = null;
+      let maxIntensity = 0;
+      
+      scene.traverse((obj) => {
+        if (obj instanceof THREE.SpotLight || obj instanceof THREE.DirectionalLight) {
+          if (obj.intensity > maxIntensity) {
+            maxIntensity = obj.intensity;
+            brightestLight = obj as (THREE.SpotLight | THREE.DirectionalLight);
+          }
+        }
+      });
+      
+      if (brightestLight) {
+        (brightestLight as THREE.Object3D).getWorldPosition(lightPosRef.current);
+      }
+      
+      // Update shader uniforms
+      [baseMaterial, accentMaterial].forEach((mat) => {
+        if (mat instanceof THREE.ShaderMaterial && mat.uniforms) {
+          if (mat.uniforms.lightPosition) {
+            mat.uniforms.lightPosition.value.copy(lightPosRef.current);
+          }
+          if (mat.uniforms.viewPosition) {
+            mat.uniforms.viewPosition.value.copy(cameraPosRef.current);
+          }
+        }
+      });
     }
   });
   
