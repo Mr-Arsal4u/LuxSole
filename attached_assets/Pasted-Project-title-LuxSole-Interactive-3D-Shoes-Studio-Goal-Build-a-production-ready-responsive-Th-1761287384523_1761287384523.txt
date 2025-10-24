@@ -1,0 +1,96 @@
+Project title: "LuxSole — Interactive 3D Shoes Studio"
+Goal: Build a production-ready, responsive Three.js website for showcasing shoes with a rich dark-green palette and extremely polished, unique animations everywhere. Deliver a complete Replit project that runs immediately (`npm start` / `npm run dev`) and includes all source files, build scripts, assets (placeholder models if needed), and deployment configuration.
+
+Tech stack & libraries:
+- Three.js (r152+)
+- React (18+) + Vite (or Next.js if generator prefers SSR) — prefer Vite+React for speed
+- TypeScript
+- GSAP (for UI and sequence animations)
+- @react-three/fiber + @react-three/drei (if using React) OR pure Three.js with modular structure (if not using React)
+- Postprocessing: postprocessing (or three/examples/jsm/postprocessing) for bloom, SMAA/FXAA
+- GLTF/GLB loader, DRACO support
+- Tailwind CSS (for utility styling) + custom theme
+- Optional: Tone.js for subtle UI sound design (muted by default)
+- Accessibility tools & Lighthouse friendly configs
+
+Design language & palette (use these exact hexes):
+- Primary rich dark green: #0F3F2B
+- Accent emerald: #1FA07A
+- Deep forest: #072A1E
+- Warm gold accent: #E1B75A
+- Neutral background: #0A0D0B
+- Soft surface highlight: rgba(255,255,255,0.03)
+Provide a CSS/Tailwind theme using these tokens.
+
+Deliverables (must produce in project):
+1. Full file structure and runnable code.
+2. `index.html`, `src/` with React components (or vanilla JS modules), and `package.json` scripts.
+3. At least one high-quality shoe model (GLB). If not allowed to include proprietary model, auto-generate a photorealistic placeholder glTF shoe using procedurally generated geometry and PBR materials; include a clear TODO for swapping real GLB.
+4. Optimized assets with DRACO compression & LOD setup.
+5. Detailed README with how to run, dev workflow, and deployment steps.
+
+Core pages & features:
+- Landing hero scene: fullscreen Three.js canvas with a rotating, interactive shoe (orbit + drag), dramatic rim lighting and environment map. The shoe should be center stage with layered UI around it.
+- Product/gallery page: multiple shoes arranged in a carousel/grid — each tile has 3D preview hover (micro-interaction) with animated reveal.
+- Customizer modal: color/material presets (leather, nubuck, glint, knit) applied live to the model with animated transitions between materials (crossfade + subtle micro-displacement).
+- Story / lookbook: 3D scene transitions between environments (studio light → runway → outdoor dusk) using cinematic camera animation sequences.
+- Cart & specs: minimal UI overlay, smooth add-to-cart micro-animations, animated confirmations.
+
+Animation guidelines (apply animations to everything):
+- Entrance animations: site elements and 3D model do synchronized intro timeline (GSAP timeline coordinating DOM + Three.js uniforms).
+- Micro-interactions: hover lift, button parallax, soft spring physics on toggles, and tactile feedback on click (scale + overshoot).
+- Camera choreography: dynamic dolly and easing curves — smooth cubic-bezier-like easing, camera paths as spline curves.
+- Shader animations: subtle iridescent sheen on accents, animated normal map for knit texture, vertex wobble only during hover/press.
+- Loading / progress: animated cinematic loader that morphs brand mark into the shoe silhouette; show skeleton progress percentages.
+- Scroll-driven scenes: use ScrollTrigger (or intersection + custom scrub) to anim-blend between scenes as user scrolls.
+
+Visual & materials directives:
+- PBR materials with roughness/metalness control; leather uses low metalness, anisotropic spec for satin accents.
+- Use HDR environment map (studio + dusk) for reflections; include blurred irradiance for soft look.
+- Subsurface scattering or fake SSS for laces/foam if feasible.
+- Subtle volumetric light/fog near ground; light cookies for dramatic shadows.
+- Shadow quality: contact shadow + PCSS-like soft edges (or approximated).
+
+Performance & responsiveness:
+- Lazy-load non-visible models and textures.
+- Provide low/med/high LODs and fallback 2D images for very small screens.
+- Use canvas-resize and pixel ratio clamp (window.devicePixelRatio capped at 2).
+- Use efficient render loop: render only when needed (interaction, animation, or visible), otherwise pause or throttle to 30fps.
+- Provide build-time compression, manifest, and caching headers.
+
+Accessibility & SEO:
+- Accessible semantic HTML for content sections outside canvas.
+- Provide ARIA labels for interactive controls.
+- Server-side meta tags for SEO and OpenGraph.
+- Add keyboard controls for 3D orbit (tab to focus + arrow/wasd rotate).
+
+Project behavior requirements (explicit):
+- The AI must generate full code and not ask clarifying questions. If assets (models/HDRIs) are needed, include royalty-free placeholders and provide links in README.
+- Include tests: at least basic unit tests for UI components (Jest + React Testing Library) or an E2E script (Playwright) that verifies the landing loads and the GLB loads.
+- Provide a `/public/manifest.json` and PWA installability basics.
+- Include an optional Netlify/Vercel deploy config.
+
+Developer notes for implementer (give as comments in code or README):
+- Mark exact locations to swap in production shoe GLB files.
+- Explain where to tweak lighting uniforms and GSAP timelines.
+- Explain how to swap color palette tokens.
+
+Extra creative requirements (tasteful & mature):
+- Avoid loud neon; keep animations refined, limited to motion with purpose.
+- Include a single, subtle golden accent animation as UI focus (e.g., gold highlight pulse on CTAs).
+- Provide a "demo mode" toggle that runs a longer cinematic showreel of the shoes when idle (muted audio option).
+
+Output format & acceptance criteria:
+- The AI should generate a complete Replit project tree, each file's content, and ready-to-run commands.
+- Provide a `preview` script so Replit shows live preview.
+- Include a short "how to test" checklist in README: run dev, verify loader, interact with shoe, open customizer, check responsiveness, run tests.
+- The end result must feel high-end, polished, and cohesive with the dark-green rich palette.
+
+Tone/voice for textual copy:
+- Luxurious, minimal, mature — few words, confident CTAs (e.g., "Explore the Craft", "Customize Finish", "Add to Collection").
+
+Important: Do not stop at skeletons — produce production-level code with comments and clear separation of concerns (e.g., `scene/`, `components/`, `shaders/`, `utils/`, `styles/`). Ensure code includes fallback for browsers without WebGL: show static hero image and clear messaging.
+
+If any external asset links are included, use only royalty-free or openly licensed resources and list their licenses in README.
+
+NOW: generate the complete project files and code for the entire site as described, ready to run in Replit. Do not ask clarifying questions — build the project.
