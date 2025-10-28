@@ -29,47 +29,8 @@ import { useLuxSole } from "@/lib/stores/useLuxSole";
 function SceneLighting() {
   return (
     <>
-      {/* Main key light - soft front lighting for white shoe */}
-      <SpotLight
-        position={[2, 5, 5]}
-        angle={0.4}
-        penumbra={0.8}
-        intensity={2}
-        castShadow
-        shadow-mapSize={[4096, 4096]}
-        color="#ffffff"
-        target-position={[0, 0, 0]}
-      />
-      
-      {/* Rim light - subtle accent for depth */}
-      <SpotLight
-        position={[-4, 3, -4]}
-        angle={0.5}
-        penumbra={1}
-        intensity={1.5}
-        color="#ffffff"
-        target-position={[0, 0, 0]}
-      />
-      
-      {/* Top light - gentle overhead illumination */}
-      <directionalLight
-        position={[0, 8, 2]}
-        intensity={1}
-        color="#ffffff"
-      />
-      
-      {/* Side fill light - soft illumination from the left */}
-      <SpotLight
-        position={[-3, 2, 0]}
-        angle={0.7}
-        penumbra={1}
-        intensity={1}
-        color="#ffffff"
-        target-position={[0, 0, 0]}
-      />
-      
-      {/* Ambient light - subtle base illumination */}
-      <ambientLight intensity={0.4} color="#ffffff" />
+      {/* Minimal ambient light only */}
+      <ambientLight intensity={0.2} color="#ffffff" />
     </>
   );
 }
@@ -497,28 +458,13 @@ export default function HeroScene() {
         {/* Globe Platform */}
         <GlobePlatform />
         
-        {/* Contact Shadows */}
-        <ContactShadows
-          position={[0, -1, 0]}
-          opacity={0.4}
-          scale={10}
-          blur={2}
-          far={4}
-        />
+        {/* Contact Shadows removed */}
         
         
         {/* Orbit Controls disabled in hero section */}
         {/* <KeyboardCamera /> */}
         
-        {/* Post-processing */}
-        <EffectComposer>
-          <Bloom
-            intensity={0.5}
-            luminanceThreshold={0.9}
-            luminanceSmoothing={0.9}
-            mipmapBlur
-          />
-        </EffectComposer>
+        {/* Post-processing removed to eliminate white glow */}
       </Canvas>
     </div>
   );
