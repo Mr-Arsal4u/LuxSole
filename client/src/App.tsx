@@ -19,6 +19,9 @@ import Gallery from "@/components/luxsole/Gallery";
 import Story from "@/components/luxsole/Story";
 import Customizer from "@/components/luxsole/Customizer";
 import Cart from "@/components/luxsole/Cart";
+import ScrollStory from "@/components/luxsole/ScrollStory";
+import ProductDetail from "@/components/luxsole/ProductDetail";
+import CustomizationStudio from "@/components/luxsole/CustomizationStudio";
 
 // Keyboard control mapping for 3D navigation
 enum Controls {
@@ -156,6 +159,9 @@ function App() {
             
             {/* Story Section */}
             <Story />
+            
+            {/* Enhanced Scroll-Driven Storytelling */}
+            <ScrollStory />
           </Suspense>
           
           {/* Footer */}
@@ -163,7 +169,15 @@ function App() {
             <div className="max-w-7xl mx-auto">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
                 <div>
-                  <h3 className="text-luxsole-gradient text-2xl font-bold mb-4">LUXSOLE</h3>
+                  {/* LuxSole Logo PNG */}
+                  <div className="flex items-center mb-4">
+                    <img 
+                      src="/icon-512x512.svg" 
+                      alt="LuxSole Logo" 
+                      className="w-12 h-12 mr-3"
+                    />
+                    <h3 className="text-luxsole-gradient text-2xl font-bold">LUXSOLE</h3>
+                  </div>
                   <p className="text-gray-400 text-sm">
                     Elevating footwear through precision craftsmanship and innovative design.
                   </p>
@@ -186,11 +200,19 @@ function App() {
                 </div>
               </div>
               
-              <div className="border-t border-luxsole-emerald/10 pt-8 text-center text-sm text-gray-500">
-                <p>&copy; 2025 LuxSole. Interactive 3D Experience powered by Three.js</p>
-                <p className="mt-2 text-xs">
-                  Placeholder models with LOD system • Production GLB files should be added to /client/public/models/
-                </p>
+              {/* Footer Background Texture */}
+              <div className="relative">
+                <img 
+                  src="/textures/grass.png" 
+                  alt="Footer Texture" 
+                  className="absolute inset-0 w-full h-full object-cover opacity-10"
+                />
+                <div className="border-t border-luxsole-emerald/10 pt-8 text-center text-sm text-gray-500 relative z-10">
+                  <p>&copy; 2025 LuxSole. Interactive 3D Experience powered by Three.js</p>
+                  <p className="mt-2 text-xs">
+                    Placeholder models with LOD system • Production GLB files should be added to /client/public/models/
+                  </p>
+                </div>
               </div>
             </div>
           </footer>

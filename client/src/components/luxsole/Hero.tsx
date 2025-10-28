@@ -59,20 +59,13 @@ export default function Hero() {
     <section
       id="hero"
       ref={heroRef}
-      className="relative w-full h-screen overflow-hidden bg-luxsole-neutral"
+      className="relative w-full h-screen overflow-hidden"
+      style={{ backgroundColor: '#234737' }}
     >
-      {/* 3D Scene Background */}
-      <div className="absolute inset-0 z-0">
-        <HeroScene />
-      </div>
-      
-      {/* Gradient Overlays */}
-      <div className="absolute inset-0 bg-gradient-to-b from-luxsole-neutral/30 via-transparent to-luxsole-neutral/80 z-10 pointer-events-none" />
-      <div className="absolute inset-0 bg-gradient-to-r from-luxsole-forest/20 via-transparent to-luxsole-forest/20 z-10 pointer-events-none" />
-      
-      {/* Content */}
-      <div className="relative z-20 h-full flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8 text-center">
-        <div className="max-w-4xl">
+      {/* Content - 2 Column Layout */}
+      <div className="relative z-10 h-full flex items-center px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        {/* Left Side - Text Content */}
+        <div className="flex-1 max-w-2xl">
           {/* Badge */}
           {isDemoMode && (
             <div className="inline-flex items-center gap-2 px-4 py-2 mb-6 glass-effect rounded-full border border-luxsole-gold/30 animate-fade-in">
@@ -86,7 +79,7 @@ export default function Hero() {
           {/* Main Heading */}
           <h1
             ref={headingRef}
-            className="text-5xl md:text-7xl lg:text-8xl font-bold mb-6 leading-tight"
+            className="text-5xl md:text-7xl font-bold mb-6 leading-tight text-left"
           >
             <span className="text-luxsole-gradient">LUXSOLE</span>
             <br />
@@ -96,14 +89,14 @@ export default function Hero() {
           {/* Subtitle */}
           <p
             ref={subtitleRef}
-            className="text-lg md:text-xl text-gray-300 mb-12 max-w-2xl mx-auto leading-relaxed"
+            className="text-lg md:text-xl text-gray-300 mb-8 leading-relaxed text-left"
           >
             Where precision craftsmanship meets innovative design. 
             Experience luxury reimagined for the modern connoisseur.
           </p>
           
           {/* CTA Buttons */}
-          <div ref={ctaRef} className="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <div ref={ctaRef} className="flex flex-col sm:flex-row items-start gap-4">
             <button
               onClick={() => setCustomizerOpen(true)}
               className="px-8 py-4 bg-luxsole-gold hover:bg-luxsole-emerald text-luxsole-forest font-bold rounded-lg transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg hover:shadow-luxsole-gold/50 animate-gold-pulse"
@@ -120,7 +113,7 @@ export default function Hero() {
           </div>
           
           {/* Feature Pills */}
-          <div className="flex flex-wrap items-center justify-center gap-4 mt-12">
+          <div className="flex flex-wrap items-center gap-4 mt-8">
             {["Premium Materials", "Hand Crafted", "Limited Edition"].map((feature) => (
               <div
                 key={feature}
@@ -132,22 +125,21 @@ export default function Hero() {
           </div>
         </div>
         
-        {/* Scroll Indicator */}
-        <button
-          onClick={scrollToGallery}
-          className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex flex-col items-center gap-2 text-luxsole-emerald hover:text-luxsole-gold transition-colors cursor-pointer animate-bounce"
-          aria-label="Scroll to collection"
-        >
-          <span className="text-sm font-medium">Discover</span>
-          <ChevronDown className="w-6 h-6" />
-        </button>
+        {/* Right Side - 3D Shoe */}
+        <div className="flex-1 h-full hidden lg:block relative z-30">
+          <HeroScene />
+        </div>
       </div>
       
-      {/* Keyboard Hint */}
-      <div className="absolute bottom-4 right-4 z-20 text-xs text-gray-500 glass-effect px-3 py-2 rounded-lg hidden lg:block">
-        <kbd className="px-2 py-1 bg-luxsole-forest rounded">Tab</kbd> + 
-        <kbd className="px-2 py-1 bg-luxsole-forest rounded ml-1">Arrows</kbd> to navigate 3D
-      </div>
+      {/* Scroll Indicator */}
+      <button
+        onClick={scrollToGallery}
+        className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex flex-col items-center gap-2 text-luxsole-emerald hover:text-luxsole-gold transition-colors cursor-pointer animate-bounce z-30"
+        aria-label="Scroll to collection"
+      >
+        <span className="text-sm font-medium">Discover</span>
+        <ChevronDown className="w-6 h-6" />
+      </button>
     </section>
   );
 }

@@ -8,80 +8,68 @@
  * - Keyboard navigation support (Arrow keys/WASD to rotate, +/- to zoom)
  */
 
-import { useRef, useEffect, Suspense, useState } from "react";
+import { useRef, useEffect, Suspense, useState, useMemo } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import {
   OrbitControls,
   PerspectiveCamera,
-  Environment,
   ContactShadows,
   SpotLight,
   useKeyboardControls,
 } from "@react-three/drei";
 import { EffectComposer, Bloom } from "@react-three/postprocessing";
 import * as THREE from "three";
-import ShoeModel from "@/models/ShoeModel";
-import ImageShoe from "@/components/luxsole/ImageShoe";
+import ShoeDracoModel from "@/models/ShoeDracoModel";
 import { useLuxSole } from "@/lib/stores/useLuxSole";
 
 /**
  * Scene Lighting Component
- * Dramatic rim lighting with studio-style setup
+ * Subtle soft lighting optimized for white shoe on dark green background
  */
 function SceneLighting() {
   return (
     <>
-      {/* Main key light - dramatic studio lighting */}
+      {/* Main key light - soft front lighting for white shoe */}
       <SpotLight
-        position={[4, 6, 4]}
-        angle={0.25}
-        penumbra={0.3}
-        intensity={3}
+        position={[2, 5, 5]}
+        angle={0.4}
+        penumbra={0.8}
+        intensity={2}
         castShadow
         shadow-mapSize={[4096, 4096]}
         color="#ffffff"
         target-position={[0, 0, 0]}
       />
       
-      {/* Rim light (emerald) - luxury accent */}
+      {/* Rim light - subtle accent for depth */}
       <SpotLight
-        position={[-4, 4, -4]}
-        angle={0.35}
-        penumbra={0.6}
-        intensity={2}
-        color="#1FA07A"
-        target-position={[0, 0, 0]}
-      />
-      
-      {/* Gold accent light - premium highlight */}
-      <spotLight
-        position={[2, 8, -6]}
-        angle={0.4}
-        penumbra={0.8}
-        intensity={1.2}
-        color="#E1B75A"
-        target-position={[0, 0, 0]}
-      />
-      
-      {/* Fill light - soft illumination */}
-      <spotLight
-        position={[0, 3, 6]}
-        angle={0.6}
+        position={[-4, 3, -4]}
+        angle={0.5}
         penumbra={1}
-        intensity={0.8}
-        color="#0F3F2B"
+        intensity={1.5}
+        color="#ffffff"
+        target-position={[0, 0, 0]}
+      />
+      
+      {/* Top light - gentle overhead illumination */}
+      <directionalLight
+        position={[0, 8, 2]}
+        intensity={1}
+        color="#ffffff"
+      />
+      
+      {/* Side fill light - soft illumination from the left */}
+      <SpotLight
+        position={[-3, 2, 0]}
+        angle={0.7}
+        penumbra={1}
+        intensity={1}
+        color="#ffffff"
         target-position={[0, 0, 0]}
       />
       
       {/* Ambient light - subtle base illumination */}
-      <ambientLight intensity={0.2} color="#0F3F2B" />
-      
-      {/* Hemisphere light for premium fill */}
-      <hemisphereLight
-        intensity={0.3}
-        color="#1FA07A"
-        groundColor="#072A1E"
-      />
+      <ambientLight intensity={0.4} color="#ffffff" />
     </>
   );
 }
@@ -133,46 +121,30 @@ function KeyboardCamera() {
  * Handles shoe rotation and material transitions
  */
 function AnimatedShoe() {
-  const { selectedShoe, customMaterial, customBaseColor, customAccentColor, isDemoMode, useAdvancedShaders } =
-    useLuxSole();
   const shoeRef = useRef<THREE.Group>(null);
-  const rotationSpeed = useRef(0);
   
-  useFrame((state, delta) => {
+  useFrame((state) => {
     if (shoeRef.current) {
-      // Smooth auto-rotation in demo mode
-      if (isDemoMode) {
-        rotationSpeed.current = THREE.MathUtils.lerp(rotationSpeed.current, 0.2, 0.03);
-      } else {
-        rotationSpeed.current = THREE.MathUtils.lerp(rotationSpeed.current, 0, 0.03);
-      }
-      
-      // Smooth rotation
-      shoeRef.current.rotation.y += rotationSpeed.current * delta;
-      
-      // Premium floating animation with subtle sway
       const time = state.clock.elapsedTime;
-      shoeRef.current.position.y = Math.sin(time * 0.3) * 0.08 + Math.sin(time * 0.7) * 0.03;
-      shoeRef.current.position.x = Math.sin(time * 0.4) * 0.02;
       
-      // Subtle scale breathing effect
-      const scale = 1 + Math.sin(time * 0.6) * 0.02;
-      shoeRef.current.scale.setScalar(scale);
+      // Gentle floating animation
+      const floatY = Math.sin(time * 0.3) * 0.08 + Math.sin(time * 0.7) * 0.03;
+      const floatX = Math.sin(time * 0.4) * 0.02 + Math.sin(time * 0.6) * 0.01;
+      const floatZ = Math.sin(time * 0.5) * 0.015;
+      
+      shoeRef.current.position.y = floatY + 1.2; // Move to top of right side
+      shoeRef.current.position.x = floatX;
+      shoeRef.current.position.z = floatZ;
+      
+      // Gentle breathing effect
+      const baseScale = 1 + Math.sin(time * 0.6) * 0.02;
+      shoeRef.current.scale.setScalar(baseScale);
     }
   });
   
-  if (!selectedShoe) return null;
-  
+  // Always render shoe (no need to check selectedShoe)
   return (
-    <ShoeModel
-      ref={shoeRef}
-      baseColor={customBaseColor}
-      accentColor={customAccentColor}
-      material={customMaterial}
-      shoeType={selectedShoe.shoeType}
-      scale={2.5}
-      useAdvancedShaders={useAdvancedShaders}
-    />
+    <ShoeDracoModel ref={shoeRef} scale={1.8} />
   );
 }
 
@@ -186,12 +158,93 @@ function Fog() {
 }
 
 /**
+ * Luxury Particle System
+ * Floating particles around the shoe for premium feel
+ */
+function LuxuryParticles() {
+  const particlesRef = useRef<THREE.Points>(null);
+  const particleCount = 150;
+  
+  useFrame((state) => {
+    if (particlesRef.current) {
+      const time = state.clock.elapsedTime;
+      
+      // Rotate particles around the shoe
+      particlesRef.current.rotation.y = time * 0.1;
+      particlesRef.current.rotation.x = Math.sin(time * 0.2) * 0.1;
+      
+      // Animate particle positions
+      const positions = particlesRef.current.geometry.attributes.position.array;
+      for (let i = 0; i < particleCount; i++) {
+        const i3 = i * 3;
+        positions[i3 + 1] += Math.sin(time + i * 0.1) * 0.001; // Y movement
+        positions[i3 + 0] += Math.cos(time + i * 0.1) * 0.0005; // X movement
+      }
+      particlesRef.current.geometry.attributes.position.needsUpdate = true;
+    }
+  });
+  
+  // Create particle geometry
+  const particlesGeometry = useMemo(() => {
+    const geometry = new THREE.BufferGeometry();
+    const positions = new Float32Array(particleCount * 3);
+    const colors = new Float32Array(particleCount * 3);
+    
+    for (let i = 0; i < particleCount; i++) {
+      const i3 = i * 3;
+      
+      // Random positions in a sphere around the shoe
+      const radius = 2 + Math.random() * 3;
+      const theta = Math.random() * Math.PI * 2;
+      const phi = Math.random() * Math.PI;
+      
+      positions[i3] = radius * Math.sin(phi) * Math.cos(theta);
+      positions[i3 + 1] = radius * Math.cos(phi);
+      positions[i3 + 2] = radius * Math.sin(phi) * Math.sin(theta);
+      
+      // Gold and emerald colors
+      const colorChoice = Math.random();
+      if (colorChoice < 0.6) {
+        colors[i3] = 0.88; // Gold R
+        colors[i3 + 1] = 0.72; // Gold G
+        colors[i3 + 2] = 0.35; // Gold B
+      } else {
+        colors[i3] = 0.12; // Emerald R
+        colors[i3 + 1] = 0.63; // Emerald G
+        colors[i3 + 2] = 0.48; // Emerald B
+      }
+    }
+    
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+    
+    return geometry;
+  }, []);
+  
+  return (
+    <points ref={particlesRef} geometry={particlesGeometry}>
+      <pointsMaterial
+        size={0.02}
+        transparent={true}
+        opacity={0.6}
+        vertexColors={true}
+        blending={THREE.AdditiveBlending}
+        sizeAttenuation={true}
+      />
+    </points>
+  );
+}
+
+/**
  * Main Hero Scene Component
  */
 export default function HeroScene() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [useImageFallback, setUseImageFallback] = useState(false);
   const [threeError, setThreeError] = useState(false);
+  
+  // Hero section background color (dark green)
+  const heroBackgroundColor = '#234737';
   
   // Check for WebGL support and 3D capabilities
   useEffect(() => {
@@ -281,24 +334,67 @@ export default function HeroScene() {
     }
   }, []);
   
-  // Use image fallback if WebGL is not supported or 3D fails
-  if (useImageFallback || threeError) {
-    return (
-      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-luxsole-dark-green to-luxsole-neutral">
-        <div className="relative w-full h-full max-w-2xl max-h-2xl">
-          <ImageShoe className="w-full h-full" />
-          
-          {/* Fallback indicator */}
-          <div className="absolute top-4 right-4 bg-luxsole-emerald/20 backdrop-blur-sm rounded-lg px-3 py-2 text-xs text-luxsole-emerald">
-            High-Quality Image Mode
-          </div>
-        </div>
-      </div>
-    );
-  }
+   // Use image fallback if WebGL is not supported or 3D fails
+   if (useImageFallback || threeError) {
+     return (
+       <div className="w-full h-full flex items-center justify-center bg-black">
+         <div className="relative w-full h-full bg-black">
+           <img
+             src="/SNEK-hero.jpg"
+             alt="SNEK Hero Sneaker"
+             className="w-full h-full object-cover drop-shadow-2xl"
+             style={{
+               animation: 'float 6s ease-in-out infinite, glow 4s ease-in-out infinite',
+               backgroundColor: 'black',
+               imageRendering: 'auto',
+               WebkitBackfaceVisibility: 'hidden',
+               backfaceVisibility: 'hidden',
+               transform: 'translateZ(0)',
+               willChange: 'transform',
+             }}
+           />
+           
+           {/* Fallback indicator */}
+           <div className="absolute top-4 right-4 bg-luxsole-emerald/20 backdrop-blur-sm rounded-lg px-3 py-2 text-xs text-luxsole-emerald">
+             High-Quality Image Mode
+           </div>
+           
+           {/* CSS Animations */}
+           <style>{`
+             @keyframes float {
+               0%, 100% { transform: translateY(0px) rotateY(0deg); }
+               50% { transform: translateY(-10px) rotateY(2deg); }
+             }
+
+             @keyframes glow {
+               0%, 100% { 
+                 filter: brightness(1) drop-shadow(0 0 20px #1FA07A40); 
+               }
+               50% { 
+                 filter: brightness(1.1) drop-shadow(0 0 30px #1FA07A60); 
+               }
+             }
+             
+             /* Ensure black background and ultra HD quality */
+             img {
+               background: black !important;
+               background-color: black !important;
+               image-rendering: -webkit-optimize-contrast;
+               image-rendering: crisp-edges;
+               image-rendering: high-quality;
+               -webkit-backface-visibility: hidden;
+               backface-visibility: hidden;
+               transform: translateZ(0);
+               will-change: transform;
+             }
+           `}</style>
+         </div>
+       </div>
+     );
+   }
 
   return (
-    <div className="w-full h-full" role="img" aria-label="Interactive 3D shoe display">
+    <div className="w-full h-full" style={{ backgroundColor: heroBackgroundColor }} role="img" aria-label="Interactive 3D shoe display">
       <Canvas
         ref={(canvas) => {
           try {
@@ -315,6 +411,7 @@ export default function HeroScene() {
           antialias: true,
           toneMapping: THREE.ACESFilmicToneMapping,
           toneMappingExposure: 1.2,
+          alpha: false, // Disable transparency for consistent background
         }}
         tabIndex={0}
         aria-label="3D canvas - use arrow keys or WASD to rotate, +/- to zoom"
@@ -323,40 +420,34 @@ export default function HeroScene() {
           setUseImageFallback(true);
         }}
       >
-        <Fog />
+        {/* Fog removed for clear background */}
         
         {/* Camera */}
         <PerspectiveCamera makeDefault position={[0, 1, 5]} fov={50} />
         
+        {/* Scene background color - dark green to match hero section */}
+        <color attach="background" args={[heroBackgroundColor]} />
+        
         {/* Lighting */}
         <SceneLighting />
         
-        {/* HDR Environment */}
-        <Suspense fallback={null}>
-          <Environment
-            preset="studio"
-            background={false}
-            blur={0.8}
-          />
-        </Suspense>
-        
-        {/* Main Shoe Model with LOD */}
+        {/* Animated Shoe Model */}
         <Suspense fallback={null}>
           <AnimatedShoe />
         </Suspense>
         
-        {/* Ground and Shadows */}
+        {/* Contact Shadows */}
         <ContactShadows
-          position={[0, -0.5, 0]}
-          opacity={0.5}
+          position={[0, -1, 0]}
+          opacity={0.4}
           scale={10}
           blur={2}
           far={4}
-          color="#072A1E"
         />
         
-        {/* Orbit Controls with keyboard support */}
-        <KeyboardCamera />
+        
+        {/* Orbit Controls disabled in hero section */}
+        {/* <KeyboardCamera /> */}
         
         {/* Post-processing */}
         <EffectComposer>
