@@ -236,6 +236,64 @@ function LuxuryParticles() {
 }
 
 /**
+ * Circular Globe Platform
+ * A rotating circular platform with globe underneath the shoe
+ */
+function GlobePlatform() {
+  const platformRef = useRef<THREE.Group>(null);
+  
+  useFrame((state) => {
+    if (platformRef.current) {
+      const time = state.clock.elapsedTime;
+      
+      // Rotate the rings in place (clockwise around their own axis)
+      platformRef.current.rotation.y = time * 1.2;
+    }
+  });
+  
+  return (
+    <group ref={platformRef} position={[0, 0.1, 0]} scale={0.6}>
+      {/* Outer circular ring */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+        <torusGeometry args={[0.8, 0.08, 12, 24]} />
+        <meshStandardMaterial
+          color="#E1B75A"
+          metalness={0.9}
+          roughness={0.2}
+          emissive="#E1B75A"
+          emissiveIntensity={0.5}
+        />
+      </mesh>
+      
+      {/* Middle decorative ring */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.005, 0]}>
+        <torusGeometry args={[0.6, 0.05, 12, 24]} />
+        <meshStandardMaterial
+          color="#1FA07A"
+          metalness={0.7}
+          roughness={0.3}
+          emissive="#1FA07A"
+          emissiveIntensity={0.4}
+        />
+      </mesh>
+      
+      {/* Inner decorative ring */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, 0]}>
+        <torusGeometry args={[0.4, 0.04, 12, 24]} />
+        <meshStandardMaterial
+          color="#ffffff"
+          metalness={0.8}
+          roughness={0.2}
+          emissive="#ffffff"
+          emissiveIntensity={0.3}
+        />
+      </mesh>
+      
+    </group>
+  );
+}
+
+/**
  * Main Hero Scene Component
  */
 export default function HeroScene() {
@@ -435,6 +493,9 @@ export default function HeroScene() {
         <Suspense fallback={null}>
           <AnimatedShoe />
         </Suspense>
+        
+        {/* Globe Platform */}
+        <GlobePlatform />
         
         {/* Contact Shadows */}
         <ContactShadows
