@@ -24,13 +24,86 @@ import { useLuxSole } from "@/lib/stores/useLuxSole";
 
 /**
  * Scene Lighting Component
- * Subtle soft lighting optimized for white shoe on dark green background
+ * Enhanced lighting with ring-based illumination and dramatic spot lights
  */
 function SceneLighting() {
   return (
     <>
-      {/* Minimal ambient light only */}
-      <ambientLight intensity={0.2} color="#ffffff" />
+      {/* Ambient light for base illumination */}
+      <ambientLight intensity={0.3} color="#ffffff" />
+      
+      {/* Main directional light from above */}
+      <directionalLight
+        position={[0, 10, 0]}
+        intensity={1.2}
+        color="#ffffff"
+        castShadow
+        shadow-mapSize-width={2048}
+        shadow-mapSize-height={2048}
+        shadow-camera-far={50}
+        shadow-camera-left={-10}
+        shadow-camera-right={10}
+        shadow-camera-top={10}
+        shadow-camera-bottom={-10}
+      />
+      
+      {/* Ring lighting - spot lights positioned around the rings */}
+      <spotLight
+        position={[2, 1, 0]}
+        angle={0.4}
+        penumbra={0.3}
+        intensity={1.5}
+        color="#E1B75A"
+        castShadow
+        target-position={[0, 0, 0]}
+      />
+      
+      <spotLight
+        position={[-2, 1, 0]}
+        angle={0.4}
+        penumbra={0.3}
+        intensity={1.5}
+        color="#1FA07A"
+        castShadow
+        target-position={[0, 0, 0]}
+      />
+      
+      <spotLight
+        position={[0, 1, 2]}
+        angle={0.4}
+        penumbra={0.3}
+        intensity={1.5}
+        color="#ffffff"
+        castShadow
+        target-position={[0, 0, 0]}
+      />
+      
+      <spotLight
+        position={[0, 1, -2]}
+        angle={0.4}
+        penumbra={0.3}
+        intensity={1.5}
+        color="#E1B75A"
+        castShadow
+        target-position={[0, 0, 0]}
+      />
+      
+      {/* Additional rim lighting */}
+      <pointLight
+        position={[3, 2, 3]}
+        intensity={0.8}
+        color="#E1B75A"
+        distance={10}
+        decay={2}
+      />
+      
+      <pointLight
+        position={[-3, 2, -3]}
+        intensity={0.8}
+        color="#1FA07A"
+        distance={10}
+        decay={2}
+      />
     </>
   );
 }
@@ -198,10 +271,13 @@ function LuxuryParticles() {
 
 /**
  * Circular Globe Platform
- * A rotating circular platform with globe underneath the shoe
+ * A rotating circular platform with enhanced lighting rings underneath the shoe
  */
 function GlobePlatform() {
   const platformRef = useRef<THREE.Group>(null);
+  const outerRingRef = useRef<THREE.Mesh>(null);
+  const middleRingRef = useRef<THREE.Mesh>(null);
+  const innerRingRef = useRef<THREE.Mesh>(null);
   
   useFrame((state) => {
     if (platformRef.current) {
@@ -209,44 +285,60 @@ function GlobePlatform() {
       
       // Rotate the rings in place (clockwise around their own axis)
       platformRef.current.rotation.y = time * 1.2;
+      
+      // Dynamic emissive intensity pulsing
+      if (outerRingRef.current) {
+        const outerMaterial = outerRingRef.current.material as THREE.MeshStandardMaterial;
+        outerMaterial.emissiveIntensity = 0.8 + Math.sin(time * 2) * 0.3;
+      }
+      
+      if (middleRingRef.current) {
+        const middleMaterial = middleRingRef.current.material as THREE.MeshStandardMaterial;
+        middleMaterial.emissiveIntensity = 0.6 + Math.sin(time * 2.5) * 0.2;
+      }
+      
+      if (innerRingRef.current) {
+        const innerMaterial = innerRingRef.current.material as THREE.MeshStandardMaterial;
+        innerMaterial.emissiveIntensity = 0.5 + Math.sin(time * 3) * 0.2;
+      }
     }
   });
   
   return (
     <group ref={platformRef} position={[0, 0.1, 0]} scale={0.6}>
-      {/* Outer circular ring */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+      {/* Outer circular ring - Gold */}
+      <mesh ref={outerRingRef} rotation={[-Math.PI / 2, 0, 0]} receiveShadow castShadow>
         <torusGeometry args={[0.8, 0.08, 12, 24]} />
         <meshStandardMaterial
           color="#E1B75A"
           metalness={0.9}
           roughness={0.2}
           emissive="#E1B75A"
-          emissiveIntensity={0.5}
+          emissiveIntensity={0.8}
         />
       </mesh>
       
-      {/* Middle decorative ring */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.005, 0]}>
+      {/* Middle decorative ring - Emerald */}
+      <mesh ref={middleRingRef} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.005, 0]} receiveShadow castShadow>
         <torusGeometry args={[0.6, 0.05, 12, 24]} />
         <meshStandardMaterial
           color="#1FA07A"
           metalness={0.7}
           roughness={0.3}
           emissive="#1FA07A"
-          emissiveIntensity={0.4}
+          emissiveIntensity={0.6}
         />
       </mesh>
       
-      {/* Inner decorative ring */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, 0]}>
+      {/* Inner decorative ring - White */}
+      <mesh ref={innerRingRef} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, 0]} receiveShadow castShadow>
         <torusGeometry args={[0.4, 0.04, 12, 24]} />
         <meshStandardMaterial
           color="#ffffff"
           metalness={0.8}
           roughness={0.2}
           emissive="#ffffff"
-          emissiveIntensity={0.3}
+          emissiveIntensity={0.5}
         />
       </mesh>
       
