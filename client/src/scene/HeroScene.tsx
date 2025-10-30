@@ -170,7 +170,7 @@ function KeyboardCamera() {
 function AnimatedShoe() {
   const shoeRef = useRef<THREE.Group>(null);
   
-  useFrame((state) => {
+  useFrame((state, delta) => {
     if (shoeRef.current) {
       const time = state.clock.elapsedTime;
       
@@ -182,6 +182,9 @@ function AnimatedShoe() {
       shoeRef.current.position.y = floatY + 1.5; // Move to top of right side
       shoeRef.current.position.x = floatX;
       shoeRef.current.position.z = floatZ;
+      
+      // Slow self-rotation around Y-axis
+      shoeRef.current.rotation.y += delta * 0.2;
       
       // Gentle breathing effect
       const baseScale = 1 + Math.sin(time * 0.6) * 0.02;
